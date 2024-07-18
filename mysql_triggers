@@ -1,0 +1,138 @@
+DELIMITER //
+
+CREATE TRIGGER balance_insert_trigger AFTER INSERT ON users_balance
+FOR EACH ROW
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE card_num VARCHAR(20);
+    DECLARE user_cards CURSOR FOR
+        SELECT card_number FROM users_card WHERE user_id = NEW.user_id AND temp = FALSE;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN user_cards;
+
+    read_loop: LOOP
+        FETCH user_cards INTO card_num;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        IF NEW.user_balance > 0 AND card_num IS NOT NULL THEN
+            INSERT INTO users_balanceobserverlog (user_id, card_number, operation_to_do, processed, timestamp)
+            VALUES (NEW.user_id, card_num, 'add card', false, NOW());
+        END IF;
+    END LOOP;
+
+    CLOSE user_cards;
+END;
+//
+
+CREATE TRIGGER balance_update_trigger AFTER UPDATE ON users_balance
+FOR EACH ROW
+BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE card_num VARCHAR(20);
+    DECLARE user_cards CURSOR FOR
+        SELECT card_number FROM users_card WHERE user_id = NEW.user_id AND temp = FALSE;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    OPEN user_cards;
+
+    read_loop: LOOP
+        FETCH user_cards INTO card_num;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        IF NEW.user_balance = 0 AND OLD.user_balance > 0 AND card_num IS NOT NULL THEN
+            INSERT INTO users_balanceobserverlog (user_id, card_number, operation_to_do, processed, timestamp)
+            VALUES (NEW.user_id, card_num, 'remove card', false, NOW());
+        ELSEIF NEW.user_balance > 0 AND OLD.user_balance = 0 AND card_num IS NOT NULL THEN
+            INSERT INTO users_balanceobserverlog (user_id, card_number, operation_to_do, processed, timestamp)
+            VALUES (NEW.user_id, card_num, 'add card', false, NOW());
+        END IF;
+    END LOOP;
+
+    CLOSE user_cards;
+END;
+//
+
+DELIMITER ;
+
+
+
+
+
+
+
+
+
+
+DELIMITER //
+
+CREATE TRIGGER subscription_added_trigger AFTER INSERT ON users_subscription
+FOR EACH ROW
+BEGIN
+    DECLARE v_card_number VARCHAR(255);
+    DECLARE done INT DEFAULT FALSE;
+
+    -- Declare a cursor to iterate over user's cards
+    DECLARE user_cards CURSOR FOR
+        SELECT card_number FROM users_card WHERE user_id = NEW.user_id AND temp = FALSE;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    -- Open the cursor
+    OPEN user_cards;
+
+    -- Loop through each card
+    read_loop: LOOP
+        FETCH user_cards INTO v_card_number;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Insert into users_subsobserverlog for each card
+        INSERT INTO users_subsobserverlog (user_id, card_number, operation_to_do, processed, timestamp)
+        VALUES (NEW.user_id, v_card_number, 'add card', false, NOW());
+    END LOOP;
+
+    -- Close the cursor
+    CLOSE user_cards;
+END;
+//
+
+CREATE TRIGGER subscription_inactive_trigger AFTER UPDATE ON users_subscription
+FOR EACH ROW
+BEGIN
+    DECLARE v_card_number VARCHAR(255);
+    DECLARE done INT DEFAULT FALSE;
+
+    -- Declare a cursor to iterate over user's cards
+    DECLARE user_cards CURSOR FOR
+        SELECT card_number FROM users_card WHERE user_id = NEW.user_id AND temp = FALSE;
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+
+    -- Open the cursor
+    OPEN user_cards;
+
+    -- Loop through each card
+    read_loop: LOOP
+        FETCH user_cards INTO v_card_number;
+        IF done THEN
+            LEAVE read_loop;
+        END IF;
+
+        -- Check if subscription is inactive
+        IF NEW.is_active = 0 THEN
+            -- Insert into users_subsobserverlog for each card
+            INSERT INTO users_subsobserverlog (user_id, card_number, operation_to_do, processed, timestamp)
+            VALUES (NEW.user_id, v_card_number, 'remove card', false, NOW());
+        END IF;
+    END LOOP;
+
+    -- Close the cursor
+    CLOSE user_cards;
+END;
+//
+
+DELIMITER ;

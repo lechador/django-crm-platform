@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Website{% endblock %}</title>
+    <!-- Link to Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <link rel="stylesheet" href="//cdn.web-fonts.ge/fonts/arial-geo/css/arial-geo.min.css">
+
+    <!-- Link to jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body class="font-sans bg-gray-100" style="font-family: 'Arial GEO', sans-serif;">
+    <main class="container mx-auto mt-8">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+       
+    </footer>
+</body>
+</html>

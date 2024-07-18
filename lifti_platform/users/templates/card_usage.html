@@ -1,0 +1,88 @@
+{% extends 'base.html' %}
+
+{% block title %}ლოგები{% endblock %}
+
+{% block content %}
+    <div class="container mx-auto p-4">
+        <h2 class="text-2xl font-bold mb-4">ლოგები</h2>
+        <div class="overflow-x-auto">
+            <table class="min-w-full bg-white border border-gray-300 shadow-md rounded">
+                <thead>
+                    <tr>
+                        <th class="py-2 px-4 border-b">დრო</th>
+                        <th class="py-2 px-4 border-b">მოწყობილობა</th>
+                        <th class="py-2 px-4 border-b">ბარათი</th>
+                        <th class="py-2 px-4 border-b">სტატუსი</th>
+                        <th class="py-2 px-4 border-b">გადახდა</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for device_event in user_device_events %}
+                        <tr>
+                            <td class="py-2 px-4 border-b text-center">{{ device_event.timestamp }}</td>
+                            <td class="py-2 px-4 border-b text-center">{{ device_event.device_id }}</td>
+                            <td class="py-2 px-4 border-b text-center">{{ device_event.card }}</td>
+                            <td class="py-2 px-4 border-b text-center font-bold {% if device_event.event_type == 0 %}text-green-600{% elif device_event.event_type == 27 %}text-red-600{% endif %}">
+                                {% if device_event.event_type == 0 %}
+                                    წარმატებული
+                                {% elif device_event.event_type == 27 %}
+                                    წარუმატებელი
+                                {% else %}
+                                    {{ device_event.event_type }}
+                                {% endif %}
+                            </td>
+                            <td class="py-2 px-4 border-b text-center">{% if device_event.payed == "0" %}
+                                    არასაკმარისი ბალანსი
+                                {% elif device_event.payed == "sub" %}
+                                    აბონემენტი
+                                {% else %}
+                                    გადახდა: {{ device_event.payed }}
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <!-- Pagination controls -->
+<!-- Pagination controls -->
+<div class="mt-4">
+    {% if user_device_events.has_other_pages %}
+        <ul class="flex justify-center">
+            {% if user_device_events.has_previous %}
+                <li class="mr-2">
+                    <a href="?page=1" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-l">პირველი</a>
+                </li>
+                <li class="mr-2">
+                    <a href="?page={{ user_device_events.previous_page_number }}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold">უკან</a>
+                </li>
+            {% endif %}
+            
+            {% for num in user_device_events.paginator.page_range %}
+                {% if num < 4 or num > user_device_events.paginator.num_pages|add:'-2' %}
+                    <li class="mr-2">
+                        <a href="?page={{ num }}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold {% if num == user_device_events.number %}bg-gray-400{% endif %}">{{ num }}</a>
+                    </li>
+                {% elif num == 4 %}
+                    <li class="mr-2">
+                        <span class="px-4 py-2 bg-gray-200 text-gray-800 font-semibold">...</span>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if user_device_events.has_next %}
+                <li class="mr-2">
+                    <a href="?page={{ user_device_events.next_page_number }}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold">შემდეგი</a>
+                </li>
+                <li>
+                    <a href="?page={{ user_device_events.paginator.num_pages }}" class="px-4 py-2 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-r">ბოლო</a>
+                </li>
+            {% endif %}
+        </ul>
+    {% endif %}
+</div>
+
+
+    </div>
+{% endblock %}

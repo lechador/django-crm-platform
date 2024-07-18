@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}მომხმარებლის გვერდი{% endblock %}
+
+{% block content %}
+<div class="max-w-xl mx-auto">
+    <div> 
+        <h2 class="text-2xl font-bold mb-4 text-gray-400">მომხმარებლის ინფორმაცია</h2>
+        <table class="w-full border-collapse max-w-xl mx-auto bg-white rounded shadow-l">
+            <tbody>
+                <tr>
+                    <td class="py-3 px-4 font-semibold text-gray-800 border-b border-gray-300">მომხმარებელი</td>
+                    <td class="py-3 px-4 text-gray-600 border-b border-gray-300 text-right">{{ request.user.first_name }} {{ request.user.last_name }}</td>
+                </tr>
+                <tr>
+                    <td class="py-3 px-4 font-semibold text-gray-800 border-b border-gray-300">ტელეფონი</td>
+                    <td class="py-3 px-4 text-gray-600 border-b border-gray-300 text-right">{{ request.user.mobile_number }}</td>
+                </tr>
+                <tr>
+                    <td class="py-3 px-4 font-semibold text-gray-800 border-b border-gray-300">პირადი ნომერი</td>
+                    <td class="py-3 px-4 text-gray-600 border-b border-gray-300 text-right">{{ request.user.username }}</td>
+                </tr>
+                <tr>
+                    <td class="py-3 px-4 font-semibold text-gray-800 border-b border-gray-300">ბინის ნომერი</td>
+                    <td class="py-3 px-4 text-gray-600 border-b border-gray-300 text-right">{{ request.user.apartment_number }}</td>
+                </tr>
+                <tr>
+                    <td class="py-3 px-4 font-semibold text-gray-800">ამხანაგობა</td>
+                    <td class="py-3 px-4 text-gray-600 text-right">{{ cooperative_name }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="mt-4"> 
+        <h2 class="text-2xl font-bold mb-4 text-gray-400">აქტიური ბარათები</h2>
+        <table class="w-full border-collapse max-w-xl mx-auto bg-white rounded shadow-l">
+            <tbody>
+                {% for card in cards %}
+                <tr>
+                    <td class="py-3 px-4 text-gray-600 border-b border-gray-300 text-center">{{ card.card_number }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+{% endblock %}

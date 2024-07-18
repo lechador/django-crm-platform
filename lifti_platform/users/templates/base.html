@@ -1,0 +1,110 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}My Website{% endblock %}</title>
+    <!-- Link to Tailwind CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
+    <link rel="stylesheet" href="//cdn.web-fonts.ge/fonts/bpg-glaho-web-caps/css/bpg-glaho-web-caps.min.css">
+
+    <!-- Link to jQuery -->
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+<body class="font-sans bg-gray-100" style="font-family: 'BPG Glaho WEB Caps', sans-serif;">
+    <!-- Header for desktop -->
+    <header class="text-gray-600 body-font bg-gray-300 hidden md:block">
+        <nav class="flex justify-between bg-white">
+            <div class="px-5 xl:px-12 py-6 flex w-full items-center">
+                <a class="text-3xl font-bold font-heading" href="/">
+                  <img src="{% static 'logo.png' %}" width="100" />
+                </a>
+                <!-- Nav Links -->
+                <ul class="hidden md:flex px-4 mx-auto font-semibold font-heading space-x-12">
+                    <li><a class="{% if request.path == '/finances/' %}text-red-700{% endif %}" href="/finances">ფინანსები</a></li>
+                    <li><a class="{% if request.path == '/card-usage/' %}text-red-700{% endif %}" href="/card-usage">ლოგები</a></li>
+                    <li><a class="{% if request.path == '/cooperative/' %}text-red-700{% endif %}" href="/cooperative">ამხანაგობა</a></li>
+                    <li><a class="{% if request.path == '/guest/' %}text-red-700{% endif %}" href="/guest">სტუმარი</a></li>
+                    <li><a class="{% if request.path == '/dashboard/' %}text-red-700{% endif %}" href="/dashboard">მომხმარებლის სივრცე</a></li>
+                </ul>
+                <!-- Header Icons -->
+                <div>
+                    <form action="{% url 'logout' %}" method="post" class="">
+                        {% csrf_token %}
+                        <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
+                            გასვლა
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Header for mobile -->
+    <header class="text-gray-600 body-font bg-gray-300 block md:hidden">
+        <nav class="flex justify-between bg-white	">
+            <div class="px-5 xl:px-12 py-6 flex w-full items-center flex justify-around">
+                <a class="text-3xl font-bold font-heading" href="#">ლოგო</a>
+                <!-- Hamburger Menu Icon -->
+                <button id="menu-toggle" class="text-gray-500 focus:outline-none focus:text-gray-700">
+                    <svg class="h-6 w-6 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path fill-rule="evenodd" d="M3 18h18v-2H3v2zM3 11h18V9H3v2zm0-7h18V2H3v2z"/>
+                    </svg>
+                </button>
+                <div>
+                  <form action="{% url 'logout' %}" method="post" class="">
+                      {% csrf_token %}
+                      <button type="submit" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
+                          გასვლა
+                      </button>
+                  </form>
+              </div>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Modal for mobile menu -->
+    <div id="mobile-menu" class="fixed inset-0 bg-black bg-opacity-50 hidden">
+        <div class="absolute top-0 right-0 p-4">
+            <button id="close-menu" class="text-white focus:outline-none">
+                <svg class="h-6 w-6 fill-current" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                    <path fill-rule="evenodd" d="M19.586 19.586a2 2 0 0 1-2.828 0L12 14.828l-4.95 4.95a2 2 0 0 1-2.828-2.828l4.95-4.95L4.222 7.95a2 2 0 1 1 2.828-2.828l4.95 4.95 4.95-4.95a2 2 0 1 1 2.828 2.828l-4.95 4.95 4.95 4.95z"/>
+                </svg>
+            </button>
+        </div>
+        <div class="flex justify-center items-center h-full">
+            <ul class="text-white text-2xl text-center">
+                <li><a class="{% if request.path == '/finances/' %}text-red-700{% endif %}" href="/finances">ფინანსები</a></li>
+                <li><a class="{% if request.path == '/card-usage/' %}text-red-700{% endif %}" href="/card-usage">ლოგები</a></li>
+                <li><a class="{% if request.path == '/cooperative/' %}text-red-700{% endif %}" href="/cooperative">ამხანაგობა</a></li>
+                <li><a class="{% if request.path == '/guest/' %}text-red-700{% endif %}" href="/guest">სტუმარი</a></li>
+                <li><a class="{% if request.path == '/dashboard/' %}text-red-700{% endif %}" href="/dashboard">მომხმარებლის სივრცე</a></li>
+            </ul>
+          </div>
+    </div>
+
+    <main class="container mx-auto mt-8">
+        {% block content %}
+        {% endblock %}
+    </main>
+
+    <footer>
+       
+    </footer>
+
+    <script>
+        $(document).ready(function(){
+            $('#menu-toggle').click(function(){
+                $('#mobile-menu').toggleClass('hidden');
+            });
+
+            $('#close-menu').click(function(){
+                $('#mobile-menu').addClass('hidden');
+            });
+        });
+    </script>
+</body>
+</html>

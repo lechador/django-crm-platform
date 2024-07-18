@@ -1,0 +1,27 @@
+{% extends 'auth.html' %}
+
+{% block title %}პაროლის აღდგენა{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto mt-8 bg-white p-8 rounded shadow-md" style="margin-top: 28vh">
+    <div class="max-w-sm mx-auto"> 
+        <form method="post">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label for="mobile_number" class="block text-gray-700 mb-4">შეიყვანე შენი ტელეფონის ნომერი:</label>
+                <input type="text" name="mobile_number" id="mobile_number" class="border border-gray-300 rounded-md px-3 py-2 w-full">
+            </div>
+            <button type="submit" class="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-blue-500 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500">
+                კოდის გაგზავნა
+            </button>
+        </form>
+            {% if messages %}
+                    <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded relative mt-2" role="alert">
+                        {% for message in messages %}
+                                <span class="block sm:inline">{{ message }}</span>
+                            {% endfor %}
+                        </div>
+            {% endif %}
+    </div>
+</div>
+{% endblock %}

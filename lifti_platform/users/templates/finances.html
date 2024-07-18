@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+
+{% block title %}ფინანსები{% endblock %}
+
+{% block content %}
+    <div class="max-w-4xl mx-auto mt-8 bg-white p-8 rounded shadow-md">
+        <div class="flex flex-col-reverse md:flex-row md:justify-between mb-8">
+            <!-- Balance -->
+            <div class="text-center">
+                <div class="flex justify-between"> 
+                    <span class="text-xl">ბალანსი</span>
+                    <span class="text-xl font-bold text-green-600">{{ user_balance }}₾</span>
+                </div>
+                <form action="{% url 'initiate_payment' %}" method="post" class="mt-4 flex flex-col">
+                    {% csrf_token %}
+                    <input type="number" placeholder="თანხა" id="deposit_amount" name="deposit_amount" class="border border-gray-300 rounded px-4 py-2 mb-2" required>
+                    <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                        ბალანსის შევსება
+                    </button>
+                </form>
+            </div>
+            <!-- Subscriptions -->
+            <div class="text-center flex flex-col justify-between">
+                {% if subscription_status %}
+                <div class="flex flex-col">
+                    <span class="text-xl">აბონემენტი</span>
+                    <span class="text-xl font-bold text-green-600">აქტიური ({{ subscription_end_date|date:"d F" }})</span>    
+                </div>       
+                {% else %}
+                <div class="flex justify-between">
+                    <span class="text-xl">აბონემენტი</span>
+                    <span class="text-xl font-bold text-red-700">არააქტიური</span>    
+                </div>    
+                {% endif %}
+
+
+                {% if not subscription_status %}
+                <form action="{% url 'finances' %}" method="post" class="flex flex-col items-center">
+                    {% csrf_token %}
+                    <select name="subscription_type_id" class="border rounded px-4 py-2 md:mb-0 width-full">
+                        {% for subscription_type in subscription_types %}
+                            <option value="{{ subscription_type.id }}">{{ subscription_type.subscription_name }} - {{ subscription_type.subscription_price }} ლარი</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 mt-2 rounded w-full">შეძენა</button>
+                </form>
+                {% endif %}
+            </div>
+        </div>
+        {% if message %}
+            <div class="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+                <p>{{ message }}</p>
+            </div>
+        {% endif %}
+
+        
+        <div class="bg-white shadow-sm">    
+            <!-- What is term -->
+            <div class="transition hover:bg-indigo-50">
+            <!-- header -->
+            <div class="accordion-header cursor-pointer transition flex space-x-5 px-5 items-center h-16">
+                <h3>ტრანზაქციები</h3>
+            </div>
+            <!-- Content -->
+            <div class="accordion-content px-5 pt-0 overflow-hidden max-h-0">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2 border">თარიღი</th>
+                                <th class="px-4 py-2 border">თანხა</th>
+                                <th class="px-4 py-2 border">სტატუსი</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for transaction in user_transactions %}
+                                <tr>
+                                    <td class="px-4 py-2 border">{{ transaction.created_at|date:"d F Y H:i" }}</td>
+                                    <td class="px-4 py-2 border">{{ transaction.amount }} ლარი</td>
+                                    <td class="px-4 py-2 border text-green-600 font-bold">
+                                        წარმატებული
+                                    </td>                        
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+    
+            <!-- When to use Accordion Components -->
+            <div class="transition hover:bg-indigo-50">
+            <!-- header -->
+            <div class="accordion-header cursor-pointer transition flex space-x-5 px-5 items-center h-16">
+                <h3>აბონემენტების ისტორია</h3>
+            </div>
+            <!-- Content -->
+            <div class="accordion-content px-5 pt-0 overflow-hidden max-h-0">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full border-collapse">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2 border">დაწყება</th>
+                                <th class="px-4 py-2 border">დასრულება</th>
+                                <th class="px-4 py-2 border">სტატუსი</th>
+                                <th class="px-4 py-2 border">ამხანაგობა</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for subscription in user_subscriptions %}
+                                <tr>
+                                    <td class="px-4 py-2 border">{{ subscription.start_date|date:"d F Y H:i" }}</td>
+                                    <td class="px-4 py-2 border">{{ subscription.end_date|date:"d F Y H:i" }}</td>
+                                    <td class="px-4 py-2 border">
+                                        {% if subscription.is_active %}
+                                            <span class="text-green-500 font-bold">აქტიური</span>
+                                        {% else %}
+                                            <span class="text-red-500 font-bold">ვადაგასული</span>
+                                        {% endif %}
+                                    </td>                        
+                                    <td class="px-4 py-2 border">{{ subscription.cooperative_id }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>    
+            </div>
+            </div>
+        </div>
+    </div>
+    
+    <style>
+        .accordion-content {
+        transition: max-height 0.3s ease-out, padding 0.3s ease;
+        }
+    </style>
+    
+    <script>
+        const accordionHeader = document.querySelectorAll(".accordion-header");
+        accordionHeader.forEach((header) => {
+        header.addEventListener("click", function () {
+            const accordionContent = header.parentElement.querySelector(".accordion-content");
+            let accordionMaxHeight = accordionContent.style.maxHeight;
+    
+            // Condition handling
+            if (accordionMaxHeight == "0px" || accordionMaxHeight.length == 0) {
+            accordionContent.style.maxHeight = `${accordionContent.scrollHeight + 32}px`;
+            header.parentElement.classList.add("bg-indigo-50");
+            } else {
+            accordionContent.style.maxHeight = `0px`;
+            header.parentElement.classList.remove("bg-indigo-50");
+            }
+        });
+        });
+    </script>
+{% endblock %}

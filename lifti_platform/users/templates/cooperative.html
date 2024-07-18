@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block title %}ამხანაგობა{% endblock %}
+
+{% block content %}
+<div class="md:max-w-4xl mx-auto">
+    <div class="mx-auto">
+            <div> 
+                <span>ამხანაგობის ბალანსი:</span>
+                <span>{{ cooperative_balance }}</span>
+            </div>
+            <!-- Tab Buttons -->
+            <div class="bg-blue-500 p-2 rounded-t-lg">
+                <div class="flex flex-wrap justify-center">
+                    {% for data in tab_data %}
+                    <button class="px-4 py-2 mb-2 mr-2 text-white font-semibold border-b-4 border-blue-700 hover:bg-blue-700 focus:outline-none tab-button" onclick="showTab('tab{{ forloop.counter }}')">{{ data.month }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+        
+            <!-- Tab Content -->
+            {% for data in tab_data %}
+            <div id="tab{{ forloop.counter }}" class="p-4 tab-content bg-white shadow-md rounded-lg {% if forloop.first %}block{% else %}hidden{% endif %}">
+                <table class="table-auto border-collapse w-full">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-2 bg-gray-200">თანხა</th>
+                            <th class="px-4 py-2 bg-gray-200">აღწერა</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for expense in data.expenses %}
+                        <tr>
+                            <td class="border px-4 py-2">- {{ expense.amount }}</td>
+                            <td class="border px-4 py-2">{{ expense.description }}</td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td class="border px-4 py-2" colspan="4">არჩეულ პერიოდში დანახარჯები არ მოიძებნა.</td>
+                        </tr>
+                        {% endfor %}
+                        {% if data.total_expenses %}
+                        <tr>
+                            <td class="border px-4 py-2 bg-red-300" colspan="1">- {{ data.total_expenses }}</td>
+                            <td class="border px-4 py-2" colspan="1">მთლიანი ხარჯი</td>
+                        </tr>
+                        {% endif %}
+                        {% if data.total_amount %}
+                        <tr>
+                            <td class="border px-4 py-2 bg-green-500" colspan="1">+ {{ data.total_amount }}</td>
+                            <td class="border px-4 py-2" colspan="1">შემოსავალი</td>
+                        </tr>
+                        {% endif %}
+                        
+                        {% if data.total_expenses %}
+                        <tr>
+                            <td class="border px-4 py-2" colspan="1">{{ data.net_total }}</td>
+                            <td class="border px-4 py-2" colspan="1">ჯამი</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+            {% endfor %}
+
+        {% if request.user.head %}
+        <!-- Add New Cooperative Expense Form -->
+        <h1 class="text-2xl font-bold mb-4 mt-10">ხარჯის დამატება</h1>
+        <form method="post" class="mb-8">
+            {% csrf_token %}
+            <div class="mb-4">
+                <label for="id_date" class="block text-gray-700 mb-1">თარიღი:</label>
+                <input type="date" id="id_date" name="date" required class="w-full rounded border border-gray-300 py-2 px-3 focus:outline-none focus:border-blue-500">
+            </div>
+            <div class="mb-4">
+                <label for="id_amount" class="block text-gray-700 mb-1">თანხა:</label>
+                <input type="number" id="id_amount" name="amount" step="0.01" required class="w-full rounded border border-gray-300 py-2 px-3 focus:outline-none focus:border-blue-500">
+            </div>
+            <div class="mb-4">
+                <label for="id_description" class="block text-gray-700 mb-1">აღწერა:</label>
+                <input type="text" id="id_description" name="description" required class="w-full rounded border border-gray-300 py-2 px-3 focus:outline-none focus:border-blue-500">
+            </div>
+            <input type="hidden" id="id_cooperative" name="cooperative" value="{{ request.user.cooperative_id }}">
+            <button type="submit" class="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">ხარჯის დამატება</button>
+        </form>
+        {% endif %}
+        {% if messages %}
+            <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded relative" role="alert">
+                {% for message in messages %}
+                    <span class="block sm:inline">{{ message }}</span>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+    </div>
+</div>
+<style>
+    .tab-button.active {
+      background-color: #fff;
+      border-color: #4299e1;
+      color: #4299e1;
+    }
+  </style>
+  
+  <script>
+    function showTab(tabId) {
+      // Hide all tab content
+      const tabContents = document.querySelectorAll('.tab-content');
+      tabContents.forEach((content) => {
+        content.classList.add('hidden');
+      });
+  
+      // Show the selected tab content
+      const selectedTab = document.getElementById(tabId);
+      if (selectedTab) {
+        selectedTab.classList.remove('hidden');
+      }
+  
+      // Remove the 'active' class from all tab buttons
+      const tabButtons = document.querySelectorAll('.tab-button');
+      tabButtons.forEach((button) => {
+        button.classList.remove('active');
+      });
+  
+      // Add the 'active' class to the clicked tab button
+      const clickedButton = document.querySelector(`[onclick="showTab('${tabId}')"]`);
+      if (clickedButton) {
+        clickedButton.classList.add('active');
+      }
+    }
+  
+    // Initialize the first tab
+    showTab('tab6');
+  </script>
+{% endblock %}
